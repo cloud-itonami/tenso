@@ -1,0 +1,208 @@
+{
+  "@context": "https://etzhayyim.com/ns/actor/v1",
+  "@id": "did:web:tenso.etzhayyim.com",
+  "actors": [
+    {
+      "description": "Per-transfer isolation DID for blob scoping",
+      "displayName": "Transfer Session",
+      "path": "transfer"
+    },
+    {
+      "description": "Per-user storage vault DID for file isolation",
+      "displayName": "User Vault",
+      "path": "vault"
+    }
+  ],
+  "capabilities": [
+    "graph.query",
+    "graph.write",
+    "agent.chat",
+    "agent.invoke",
+    "derive:social"
+  ],
+  "complianceDocs": [
+    "90-docs/rules/compliance/per-did-kyumei-shinka-autonomy.md",
+    "90-docs/platform/260403-live-data-kyumei-shinka-consolidated.md"
+  ],
+  "convoSystemPrompt": "You are Tenso, a secure file transfer agent. You help users send and receive files with end-to-end encryption using Signal Protocol. Files are encrypted client-side with AES-256-GCM before upload; the server never sees plaintext. You can create transfers, check transfer status, and help recipients download and decrypt files. Respond helpfully in the user's language.",
+  "derive": {
+    "invoke": [
+      {
+        "map": {
+          "entityDid": "{{actorDid}}",
+          "event": "transfer_error",
+          "transferId": "{{transferId}}"
+        },
+        "method": "com.etzhayyim.apps.yabai.assessRisk",
+        "on": "com.etzhayyim.apps.tenso.transferLog",
+        "target": "did:web:yabai.etzhayyim.com",
+        "when": {
+          "eventType": "error"
+        }
+      }
+    ],
+    "social": [
+      {
+        "on": "com.etzhayyim.apps.tenso.transferRequest",
+        "template": "File transfer completed: {{filename}} ({{sizeBytes}} bytes)",
+        "when": {
+          "status": "completed"
+        }
+      }
+    ]
+  },
+  "description": "Zero-knowledge file transfer with Signal Protocol E2E encryption. Chunked upload, content-addressed B2 storage, per-transfer AES-256-GCM file key wrapped via X3DH key agreement. Server never sees plaintext.",
+  "displayName": "Tenso - Signal E2E Secure File Transfer",
+  "domainKnowledgeRequired": true,
+  "runtime": "k8s-langserver",
+  "edge": "sveltekit-proxy",
+  "legacyExecutionTier": "T1",
+  "governance": {
+    "classification": "confidential",
+    "complianceFrameworks": [
+      "signal-protocol-e2e",
+      "zero-knowledge-storage"
+    ],
+    "raci": "responsible"
+  },
+  "heartbeatRequired": true,
+  "name": "tenso",
+  "nanoid": "t3ns0f1l",
+  "performerType": "service",
+  "pipelines": [
+    {
+      "steps": [
+        {
+          "args": {
+            "map": {
+              "filename": "{{record.filename}}",
+              "senderDid": "{{record.senderDid}}",
+              "sizeBytes": "{{record.sizeBytes}}",
+              "transferId": "{{record.transferId}}"
+            },
+            "method": "com.etzhayyim.apps.tenso.notifyTransfer",
+            "target": "{{record.recipientDid}}"
+          },
+          "fn": "agent.invoke",
+          "id": "notifyRecipient"
+        }
+      ],
+      "trigger": {
+        "collections": [
+          "com.etzhayyim.apps.tenso.transferRequest"
+        ],
+        "type": "subscribeRepos"
+      }
+    },
+    {
+      "steps": [
+        {
+          "args": {
+            "map": {
+              "entityDid": "{{record.actorDid}}",
+              "event": "file_transfer",
+              "transferId": "{{record.transferId}}"
+            },
+            "method": "com.etzhayyim.apps.yabai.assessRisk",
+            "target": "did:web:yabai.etzhayyim.com"
+          },
+          "fn": "agent.invoke",
+          "id": "auditCheck"
+        }
+      ],
+      "trigger": {
+        "collections": [
+          "com.etzhayyim.apps.tenso.transferLog"
+        ],
+        "type": "subscribeRepos"
+      }
+    },
+    {
+      "steps": [
+        {
+          "args": {
+            "sql": "MATCH (t:TransferRequest) WHERE t.expire_at < $now AND t.status <> 'purged' RETURN t.transfer_id AS transferId, t.blob_keys AS blobKeys LIMIT 500"
+          },
+          "fn": "graph.query",
+          "id": "purgeExpired"
+        },
+        {
+          "args": {
+            "template": "MATCH (t:TransferRequest) WHERE t.transfer_id IN $purgeExpired.transferIds SET t.status = 'purged', t.purged_at = $now"
+          },
+          "fn": "graph.write",
+          "id": "markPurged"
+        }
+      ],
+      "trigger": {
+        "cron": "0 */1 * * *",
+        "type": "cron"
+      }
+    },
+    {
+      "steps": [
+        {
+          "args": {
+            "sql": "MATCH (n) WHERE n.repo = $did RETURN count(n) AS nodeCount LIMIT 1"
+          },
+          "fn": "graph.query",
+          "id": "coverageNodes"
+        },
+        {
+          "args": {
+            "template": "MERGE (c:ActorCoverageSnapshot {actorDid: $did, bucket: 'default', actorName: 'tenso', nanoid: 'tenso', nodeCount: $coverageNodes.nodeCount, latestTs: $now, repo: $did, collection: 'com.etzhayyim.actor.coverage', status: 'active', snapshotTs: $now})"
+          },
+          "fn": "graph.write",
+          "id": "coverageSnapshot"
+        }
+      ],
+      "trigger": {
+        "cron": "0 */6 * * *",
+        "type": "cron"
+      }
+    }
+  ],
+  "profile": {
+    "agentType": "autonomous",
+    "capabilities": [
+      "create-transfer",
+      "accept-transfer",
+      "download-chunk",
+      "revoke-transfer",
+      "list-transfers",
+      "init-signal-session",
+      "encrypt-file-key",
+      "decrypt-file-key"
+    ],
+    "description": "Zero-knowledge secure file transfer. Signal Protocol X3DH + Double Ratchet for key exchange, AES-256-GCM per-transfer file key, chunked encrypted blob upload to B2, content-addressed dedup on ciphertext.",
+    "displayName": "Tenso - Signal E2E Secure File Transfer",
+    "isBot": true,
+    "operator": "etzhayyim.co.jp"
+  },
+  "requiredCollections": [
+    "com.etzhayyim.apps.standard.shinkaEvolution",
+    "com.etzhayyim.apps.standard.shinkaKnowledge"
+  ],
+  "requiredLoops": [
+    "shinka",
+    "koji",
+    "kyumei",
+    "domain-knowledge"
+  ],
+  "standardRule": "per-did-kyumei-shinka-autonomy@2026-04-13",
+  "standardStatus": "required",
+  "triggers": {
+    "subscribeRepos": {
+      "collections": [
+        "app.bsky.feed.post",
+        "app.bsky.feed.like",
+        "app.bsky.graph.follow",
+        "com.etzhayyim.apps.tenso.transferRequest",
+        "com.etzhayyim.apps.tenso.fileManifest",
+        "com.etzhayyim.apps.tenso.transferLog",
+        "com.etzhayyim.apps.tenso.accessControl"
+      ]
+    }
+  },
+  "uiType": "appview"
+}
