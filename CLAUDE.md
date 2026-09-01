@@ -1,3 +1,12 @@
+> **This file describes the tenso *service*, which is not in this repo.**
+> This repo (`cloud-itonami/tenso`) is a library: one pure `.cljc` planner,
+> `tenso.murakumo`, with no crypto, no network and no storage. The service
+> below — Signal X3DH, Double Ratchet, chunked B2 upload, the
+> `etzhayyim deploy` command — lives in `kotoba-lang/tenso`
+> (`appview/etzhayyim-wasm-tenso-t3ns0f1l`), and the build path quoted at the
+> bottom of this file does not exist in this tree.
+> Read [`README.md`](README.md) for what this repo actually contains.
+
 # tenso.etzhayyim.com - Signal E2E Secure File Transfer
 
 ## Overview
