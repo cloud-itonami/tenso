@@ -56,7 +56,7 @@ Measured 2026-09-02:
 
 | where | value | resolves? |
 |---|---|---|
-| `src/tenso/murakumo.cljc` `actor-did` | `did:web:tenso.etzhayyim.com` | **no — `tenso.etzhayyim.com` is NXDOMAIN** |
+| `src/tenso/murakumo.kotoba` `actor-did` | `did:web:tenso.etzhayyim.com` | **no — `tenso.etzhayyim.com` is NXDOMAIN** |
 | `actor-manifest.jsonld` `@id` | `did:web:tenso.etzhayyim.com` | same, no |
 | `.well-known/did.json` `id` | `did:web:etzhayyim.com:actor:tenso` | **yes — 200** |
 

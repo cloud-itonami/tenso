@@ -53,7 +53,7 @@ network; later runs are offline.
 
 ## 2. Run the tests — no JVM
 
-`src/tenso/murakumo.cljc` contains **no reader conditionals**, and the test file's
+`src/tenso/murakumo.kotoba` contains **no reader conditionals**, and the test file's
 only one is the `ExceptionInfo` class in `thrown?`. So the same suite runs on
 nbb, which matters on a machine already carrying JVMs.
 
@@ -83,7 +83,7 @@ to a suite that passed.
 
 ```bash
 $ clojure -M:lint
-src/tenso/murakumo.cljc:145:14: warning: unused binding input
+src/tenso/murakumo.kotoba:145:14: warning: unused binding input
 linting took 2356ms, errors: 0, warnings: 1
 ```
 
@@ -160,7 +160,7 @@ Three things to read off that output:
 
 ## 5. Add or change a cell
 
-Edit the `cell-specs` map in `src/tenso/murakumo.cljc`. The tests **introspect
+Edit the `cell-specs` map in `src/tenso/murakumo.kotoba`. The tests **introspect
 `cell-specs`** rather than hardcoding cell names, so a new cell is covered by all
 9 tests the moment you add it — nothing in `test/` needs editing.
 
@@ -170,7 +170,7 @@ purpose and checking that a *named* test catches it:
 ```bash
 # make the gate stop refusing
 python3 - <<'PY'
-p='src/tenso/murakumo.cljc'; s=open(p).read()
+p='src/tenso/murakumo.kotoba'; s=open(p).read()
 s=s.replace("""(defn missing-gates
   [spec attestations]
   (->> (:required-gates spec)
@@ -181,7 +181,7 @@ s=s.replace("""(defn missing-gates
 open(p,'w').write(s)
 PY
 nbb --classpath "src:test" /tmp/tenso-run.cljs; echo "exit=$?"
-git checkout src/tenso/murakumo.cljc     # put it back
+git checkout src/tenso/murakumo.kotoba     # put it back
 ```
 
 ```
