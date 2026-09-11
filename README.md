@@ -83,8 +83,8 @@ name that still resolves here through GitHub's rename redirect.
 ## Run it
 
 ```bash
-clojure -M:test     # 9 tests, 187 assertions
-clojure -M:lint     # exit 0; 1 known warning (unused binding, murakumo.cljc:145)
+kbb -M:test     # 9 tests, 187 assertions
+kbb -M:lint     # exit 0; 1 known warning (unused binding, murakumo.cljc:145)
 ```
 
 `.cljc` with no reader conditionals in the source, so it also runs on nbb without
