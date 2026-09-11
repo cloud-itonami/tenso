@@ -38,7 +38,7 @@ west project; do not "fix" it by checking out `main`.
 This is the path `deps.edn` declares.
 
 ```bash
-$ clojure -M:test
+$ kbb -M:test
 
 Running tests in #{"test"}
 
@@ -63,7 +63,7 @@ cat > /tmp/tenso-run.cljs <<'EOF'
 (def r (t/run-tests 'tenso.murakumo-test))
 (when (or (pos? (:fail r)) (pos? (:error r))) (js/process.exit 1))
 EOF
-nbb --classpath "src:test" /tmp/tenso-run.cljs
+kbb --backend sci --classpath "src:test" /tmp/tenso-run.cljs
 ```
 
 ```
@@ -82,7 +82,7 @@ to a suite that passed.
 ## 3. Lint
 
 ```bash
-$ clojure -M:lint
+$ kbb -M:lint
 src/tenso/murakumo.kotoba:145:14: warning: unused binding input
 linting took 2356ms, errors: 0, warnings: 1
 ```
@@ -117,7 +117,7 @@ cat > /tmp/tenso-plan.cljs <<'EOF'
       p (m/cell-plan :transferrequest {:attestations att :request-id "req-demo-2"})]
   (println "status" (:status p) "missing" (pr-str (:missing-gates p))))
 EOF
-nbb --classpath src /tmp/tenso-plan.cljs
+kbb --backend sci --classpath src /tmp/tenso-plan.cljs
 ```
 
 ```
@@ -180,7 +180,7 @@ s=s.replace("""(defn missing-gates
   [])""")
 open(p,'w').write(s)
 PY
-nbb --classpath "src:test" /tmp/tenso-run.cljs; echo "exit=$?"
+kbb --backend sci --classpath "src:test" /tmp/tenso-run.cljs; echo "exit=$?"
 git checkout src/tenso/murakumo.kotoba     # put it back
 ```
 
@@ -209,6 +209,6 @@ Named so the next operator does not read silence as a pass.
 - **The service described in `CLAUDE.md` was not exercised at all.** It is not in
   this repo. Its `etzhayyim deploy --smoke-url …` command targets a path
   (`60-apps/etzhayyim-project-tenso/…`) that does not exist in this tree.
-- **`clojure -M:test` was run online.** A first run on an offline machine will
+- **`kbb -M:test` was run online.** A first run on an offline machine will
   fail at dependency resolution, not at the tests; that failure mode was not
   reproduced here.
