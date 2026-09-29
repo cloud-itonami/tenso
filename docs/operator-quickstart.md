@@ -206,7 +206,7 @@ Named so the next operator does not read silence as a pass.
   repo writes to a PDS, and no PDS was contacted while writing this document.
 - **`did:web:tenso.etzhayyim.com` was resolved and it does not exist**
   (NXDOMAIN, 2026-09-02) — but nothing here was changed in response. See README.
-- **The service described in `CLAUDE.md` was not exercised at all.** It is not in
+- **The service described in `AGENTS.md` was not exercised at all.** It is not in
   this repo. Its `etzhayyim deploy --smoke-url …` command targets a path
   (`60-apps/etzhayyim-project-tenso/…`) that does not exist in this tree.
 - **`kbb -M:test` was run online.** A first run on an offline machine will

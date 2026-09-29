@@ -21,11 +21,11 @@ tenso.murakumo :  (cell-key, attestations, input)  ->  {:status :blocked  :effec
 | **`cloud-itonami/tenso`** (here) | `lib` | `tenso.murakumo` — pure planner, 205 lines, no I/O |
 | `kotoba-lang/tenso` | `app` (`com-etzhayyim-app-tenso`) | the actual service: `appview/etzhayyim-wasm-tenso-t3ns0f1l`, `kotoba/` |
 
-⚠ **`CLAUDE.md` in this repo describes the app, not this library.** It is a
-near-copy of the app repo's `CLAUDE.md` (134 diff lines between the two, measured
+⚠ **`AGENTS.md` in this repo describes the app, not this library.** It is a
+near-copy of the app repo's `AGENTS.md` (134 diff lines between the two, measured
 2026-09-02) and documents Signal X3DH, Double Ratchet, chunked B2 upload and a
 `etzhayyim deploy` command against a path that does not exist here. **None of
-that is implemented in this repo.** Read `CLAUDE.md` as background on the product
+that is implemented in this repo.** Read `AGENTS.md` as background on the product
 this planner belongs to; read this README for what the code does.
 
 ## What the planner does
